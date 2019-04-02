@@ -1,0 +1,5 @@
+Hello world
+// THIS IS A COMMENT
+😍 Hello, 汉字
+// AND ANOTHER ONE
+That's great!!!
