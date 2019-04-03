@@ -3,3 +3,11 @@ Hello world
 😍 Hello, 汉字
 // AND ANOTHER ONE
 That's great!!!
+/* Multieline on a singleline */
+and
+another
+yup /* comment
+on
+mutliple
+lines */ wow
+yeah

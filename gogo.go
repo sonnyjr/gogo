@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"os"
 	"log"
-	"github.com/sonnyjr/gogo/LexicalAnalyzer"
+	"github.com/sonnyjr/gogo/lexan"
 )
 
 func main(){
@@ -18,11 +18,11 @@ func main(){
 			log.Fatal("Failed to open file:", err)
 		}
 
-		lex := lexicalAnalyzer.New(reader, args[0])
+		lex := lexan.New(reader, args[0])
 		lex.Analyze()		
 	} else {
 		reader := bufio.NewReader(os.Stdin)
-		lex := lexicalAnalyzer.New(reader, "<STDIN>")
+		lex := lexan.New(reader, "<STDIN>")
 		lex.Analyze()
 	}
 }
