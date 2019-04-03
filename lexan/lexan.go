@@ -3,7 +3,6 @@ package lexan
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"io"
 )
 
@@ -14,45 +13,56 @@ type Analyzer struct {
 
 
 func New(data * bufio.Reader, filename string) Analyzer {
-	source := Source{data: data, filename: filename}
+	state := SourceState{previous: nil, next: nil}
+	source := Source{data: data, filename: filename, state: &state}
 	return Analyzer{source: &source, filename: filename}
 }
 
 func (l * Analyzer) Analyze(){
 	for {
-
 		comment := l.parseComment()
 
 		if comment != nil {
 			fmt.Printf("%s\n", comment)
 		} else {
-			err := l.readRune()
+			word := l.parseWord()
 
-			if err == io.EOF {
-				fmt.Printf("END-OF-FILE\n")
-				return
-			}
-			
-			if err != nil {
-				log.Fatal(err)
+			if word != nil {
+				fmt.Printf("%s\n", word)
+			} else {
+				tkn, err := l.readRune()
+
+				if tkn != nil {
+					fmt.Printf("%s\n", tkn)
+				}
+				
+				if err == io.EOF {
+					fmt.Printf("END-OF-FILE\n")
+					return
+				}			
 			}
 		}
 	}
 }
 
-func (l * Analyzer) readRune() error {
+func (l * Analyzer) readRune() (* Token, error) {
+	startingLine := l.source.state.lineNumber
+	startingByte := l.source.state.bytePosition	
 	r, size, err := l.source.Read()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 	
-	if r == '\n' {			
-		fmt.Printf("%s:%d:NEWLINE:%d\n", l.filename, l.source.bytePosition, size)
-	} else {
-		fmt.Printf("%s:%d:%c:%d\n", l.filename, l.source.bytePosition, r, size)
+	if r == '\n' {
+		return &Token{kind: newline,
+			value: "\n",
+			filename: l.filename,
+			line: startingLine,
+			byte: startingByte, 
+			size: size}, nil	
 	}
 
-	return nil
+	return nil, nil
 }
 

@@ -1,22 +1,26 @@
 package lexan
 
+// RuneRep holds a rune and it's size
 type RuneRep struct {
 	r rune	
 	size int
 }
 
-type RuneStack struct {
+// RuneQueue holds a slice of RuneReps.
+type RuneQueue struct {
 	s []RuneRep
 	head int
 	tail int	
 }
 
-func (r * RuneStack) Push(rep RuneRep){
+// Adds a Runerep to the end of a queue.
+func (r * RuneQueue) Add(rep RuneRep){
 	r.s = append(r.s, rep)
 	r.tail += 1
 }
 
-func (r * RuneStack) Pop() *RuneRep {
+// Removes a RuneRep from the top of the queue
+func (r * RuneQueue) Remove() *RuneRep {
 	if len(r.s) <= r.head || r.Size() == 0 {
 		return nil
 	}
@@ -33,7 +37,8 @@ func (r * RuneStack) Pop() *RuneRep {
 	return &rep
 }
 
-func (r * RuneStack) Prepend(runes []RuneRep){
+// Prepends a slice of RuneReps to the stack
+func (r * RuneQueue) Prepend(runes []RuneRep){
 	old := r.s[r.head:r.tail]
 	new := runes
 	
@@ -43,9 +48,10 @@ func (r * RuneStack) Prepend(runes []RuneRep){
 
 	r.s = new
 	r.head = 0
-	r.tail = len(new) - 1
+	r.tail = len(new)
 }
 
-func (r * RuneStack) Size() int {
+// Get's the current size of the RuneStack
+func (r * RuneQueue) Size() int {
 	return r.tail - r.head
 }

@@ -6,28 +6,40 @@ import "fmt"
 // TokenKind is just an int
 type TokenKind int
 
+// The Token type holds the TokenKind that was found,
+// it's value, and location information within the
+// source files.
 type Token struct {
 	kind TokenKind
 	value string
-	filename string	
+	filename string
+	line int
 	byte int
-	size uint16
+	size int
 }
 
+// Define the TokenKind constants
 const (
 	comment TokenKind = iota
-	char TokenKind = iota
-	newline TokenKind = iota
+	char
+	word
+	newline
 )
 
+// Convert's the TokenKind to it's string representation.
 func (t TokenKind) String() string {
 	return [...]string{
 		"COMMENT",
 		"CHAR",
+		"WORD",
 		"NEWLINE"}[t]
 }
 
-
+// Convert's the Token to it's string representation.
 func (t Token) String() string {
-	return fmt.Sprintf("%s:%d:%d:%s:%s", t.filename, t.byte, t.size, t.kind, t.value)
+	if t.kind == newline {
+		return fmt.Sprintf("%s:%d:%d:%s", t.filename, t.line, t.byte, t.kind)
+	} else {
+		return fmt.Sprintf("%s:%d:%d:%s(%s)", t.filename, t.line, t.byte, t.kind, t.value)
+	}
 }
