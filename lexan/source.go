@@ -4,15 +4,15 @@ import (
 	"bufio"
 )
 
+// The current read state of the Source file.
 type SourceState struct {
 	lineNumber int
 	totalBytes int
 	bytePosition int
-	
-	previous * SourceState
-	next * SourceState
 }
 
+// The source type represents the current file
+// and read status.
 type Source struct {
 	data * bufio.Reader
 	filename string
@@ -29,28 +29,24 @@ func (s * Source) Match(value string) bool {
 		return false
 	}
 
-	runes := []rune{}
-	for _, rep := range reps {
-		runes = append(runes, rep.r)
-	}
-	
-	if string(runes) != value {
-		return false
+	for i, r := range value {
+		if r != reps[i].r {
+			return false
+		}
 	}
 
 	return true
 }
 
-// Peek's n runes ahead.
+// Peek's n runes ahead without changing the state
 func (s * Source) Peek(n int) ([]RuneRep, error) {
 	runes := []RuneRep{}
 	totalSize := 0
 	
 	for i := 0; i < n; i++ {
-		r, size, err := s.Read()			
+		r, size, err := s.read(false)
 			
 		if err != nil {
-			s.revertState(len(runes))			
 			s.queue.Prepend(runes)
 			return runes, err
 		}
@@ -60,51 +56,45 @@ func (s * Source) Peek(n int) ([]RuneRep, error) {
 		runes = append(runes, rep)
 	}
 
-	s.revertState(len(runes))
 	s.queue.Prepend(runes)
 	return runes, nil
 }
 
+// Read's a rune and updates the current state
 func (s * Source) Read() (rune, int, error) {	
+	return s.read(true)
+}
+
+// Read's a rune from the source and updates the state
+// based on the update value.
+func (s * Source) read(update bool) (rune, int, error){
 	rep := s.queue.Remove()
 	
 	if rep != nil {
-		s.updateState((*rep))
+		if update {
+			s.updateState((*rep))
+		}
+		
 		return (*rep).r, (*rep).size, nil
 	}
 	
 	r, size, err := s.data.ReadRune()
-	s.updateState(RuneRep{r: r, size: size})	
-	
-	return r, size, err
-}
 
-func (s * Source) revertState(n int){
-	for i := 0; i < n; i++ {
-		previous := s.state.previous
-		s.state = previous
-		previous.next = nil
+	if update {
+		s.updateState(RuneRep{r: r, size: size})
 	}
+	
+	return r, size, err	
 }
 
+// Updates the state based on the rune that was read.
 func (s * Source) updateState(rep RuneRep){
-	newLine := s.state.lineNumber
-	newBytes := s.state.bytePosition
-	newTotalBytes := s.state.totalBytes + rep.size
+	s.state.totalBytes += rep.size
 	
-	if rep.r == '\n' {
-		newLine += 1
-		newBytes = 0
+	if rep.r == '\n' {		
+		s.state.lineNumber += 1
+		s.state.bytePosition = 0
 	} else {
-		newBytes += rep.size
+		s.state.bytePosition += rep.size
 	}
-
-	newState := &SourceState{lineNumber: newLine,
-		bytePosition: newBytes,
-		totalBytes: newTotalBytes,
-		previous: s.state}
-
-	s.state.next = newState
-
-	s.state = newState
 }

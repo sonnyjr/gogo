@@ -1,3 +1,4 @@
+// The lexan package is a Lexical Analyzer for the go programming language
 package lexan
 
 import (
@@ -6,18 +7,20 @@ import (
 	"io"
 )
 
+// Analyzer represents the analysis of the program.
 type Analyzer struct {
 	source * Source
 	filename string
 }
 
-
+// New creates a new Analyzer.
 func New(data * bufio.Reader, filename string) Analyzer {
-	state := SourceState{previous: nil, next: nil}
+	state := SourceState{}
 	source := Source{data: data, filename: filename, state: &state}
 	return Analyzer{source: &source, filename: filename}
 }
 
+// Analyzer method will start the lexical analysis of the program
 func (l * Analyzer) Analyze(){
 	for {
 		comment := l.parseComment()
@@ -30,11 +33,7 @@ func (l * Analyzer) Analyze(){
 			if word != nil {
 				fmt.Printf("%s\n", word)
 			} else {
-				tkn, err := l.readRune()
-
-				if tkn != nil {
-					fmt.Printf("%s\n", tkn)
-				}
+				_, _, err := l.source.Read()
 				
 				if err == io.EOF {
 					fmt.Printf("END-OF-FILE\n")
@@ -44,25 +43,3 @@ func (l * Analyzer) Analyze(){
 		}
 	}
 }
-
-func (l * Analyzer) readRune() (* Token, error) {
-	startingLine := l.source.state.lineNumber
-	startingByte := l.source.state.bytePosition	
-	r, size, err := l.source.Read()
-
-	if err != nil {
-		return nil, err
-	}
-	
-	if r == '\n' {
-		return &Token{kind: newline,
-			value: "\n",
-			filename: l.filename,
-			line: startingLine,
-			byte: startingByte, 
-			size: size}, nil	
-	}
-
-	return nil, nil
-}
-
