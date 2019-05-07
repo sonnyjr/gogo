@@ -23,7 +23,6 @@ const (
 	comment TokenKind = iota
 	char
 	word
-	newline
 )
 
 // Convert's the TokenKind to it's string representation.
@@ -31,15 +30,10 @@ func (t TokenKind) String() string {
 	return [...]string{
 		"COMMENT",
 		"CHAR",
-		"WORD",
-		"NEWLINE"}[t]
+		"WORD"}[t]
 }
 
 // Convert's the Token to it's string representation.
 func (t Token) String() string {
-	if t.kind == newline {
-		return fmt.Sprintf("%s:%d:%d:%s", t.filename, t.line, t.byte, t.kind)
-	} else {
-		return fmt.Sprintf("%s:%d:%d:%s(%s)", t.filename, t.line, t.byte, t.kind, t.value)
-	}
+	return fmt.Sprintf("%s:%d:%d:%s(%s)", t.filename, t.line, t.byte, t.kind, t.value)
 }

@@ -2,14 +2,14 @@ package lexan
 
 import "testing"
 
-// Tests adding runes to the RuneQueue.
+// Tests adding runes to the CharacterQueue.
 func TestAdd(t *testing.T) {
-	queue := RuneQueue{}
+	queue := CharacterQueue{}
 	runes := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'}
 	
 	for i, r := range runes {
-		rep := RuneRep{r: r, size: 1}
-		queue.Add(rep)
+		char := NewCharacter(r, 1)
+		queue.Add(char)
 
 		if queue.head != 0 {
 			t.Errorf("Head invalid. Should be 0")
@@ -23,18 +23,18 @@ func TestAdd(t *testing.T) {
 
 // Tests adding and then removing runes from the queue.
 func TestRemove(t *testing.T) {
-	queue := RuneQueue{}
+	queue := CharacterQueue{}
 	runes := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'}
 	
 	for _, r := range runes {
-		rep := RuneRep{r: r, size: 1}
-		queue.Add(rep)
+		char := NewCharacter(r, 1)
+		queue.Add(char)
 	}
 
 	for i, r := range runes {
 		top := queue.Remove()
 		
-		if top.r != r {
+		if top.char != r {
 			t.Errorf("Runes does not equal.")
 		}
 
@@ -50,12 +50,12 @@ func TestRemove(t *testing.T) {
 
 // Tests prepending runes to the queue.
 func TestPrepend(t *testing.T){
-	queue := RuneQueue{}
+	queue := CharacterQueue{}
 	runes := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'}
 	
 	for _, r := range runes {
-		rep := []RuneRep{RuneRep{r: r, size: 1}}
-		queue.Prepend(rep)		
+		chars := []Character{NewCharacter(r, 1)}
+		queue.Prepend(chars)		
 	}
 
 	if queue.Size() != len(runes) {
@@ -70,8 +70,8 @@ func TestPrepend(t *testing.T){
 			t.Errorf("rep is nil.")
 		}
 		
-		if rep.r != runes[i-1] {
-			t.Errorf("Runes are not equal. %c != %c", rep.r, runes[i])
+		if rep.char != runes[i-1] {
+			t.Errorf("Runes are not equal. %c != %c", rep.char, runes[i])
 		}
 	}
 }

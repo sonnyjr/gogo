@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// Parses a comment.
 func (l * Analyzer) parseComment() *Token {
 	comment := l.ParseSingleLineComment()
 
@@ -15,6 +16,7 @@ func (l * Analyzer) parseComment() *Token {
 	return l.ParseMultilineComment()	
 }
 
+// Attempts to parse a single line comment.
 func (l * Analyzer) ParseSingleLineComment() * Token {
 	if !l.source.Match ("//") {
 		return nil
@@ -45,6 +47,7 @@ func (l * Analyzer) ParseSingleLineComment() * Token {
 		size: size}	
 }
 
+// Attempts to parse a multiline comment.
 func (l * Analyzer) ParseMultilineComment() * Token {
 	if !l.source.Match ("/*") {
 		return nil
@@ -77,7 +80,7 @@ func (l * Analyzer) ParseMultilineComment() * Token {
 				log.Fatal(err)
 			}
 
-			if runes[0].r == '/' {
+			if runes[0].char == '/' {
 				rune, s, _ := l.source.Read()
 				size += s
 				value = append(value, rune)

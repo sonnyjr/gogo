@@ -23,23 +23,28 @@ func New(data * bufio.Reader, filename string) Analyzer {
 // Analyzer method will start the lexical analysis of the program
 func (l * Analyzer) Analyze(){
 	for {
+		// Attempt to parse comment
 		comment := l.parseComment()
 
 		if comment != nil {
 			fmt.Printf("%s\n", comment)
-		} else {
-			word := l.parseWord()
+			continue
+		} 
 
-			if word != nil {
-				fmt.Printf("%s\n", word)
-			} else {
-				_, _, err := l.source.Read()
+		// Attempt to parse word
+		word := l.parseWord()
+
+		if word != nil {
+			fmt.Printf("%s\n", word)
+			continue
+		} 
+
+		// Consume the next character
+		_, _, err := l.source.Read()
 				
-				if err == io.EOF {
-					fmt.Printf("END-OF-FILE\n")
-					return
-				}			
-			}
+		if err == io.EOF {
+			fmt.Printf("END-OF-FILE\n")
+			return
 		}
 	}
 }

@@ -15,7 +15,7 @@ func (l * Analyzer) parseWord() *Token {
 	for {
 		reps, err := l.source.Peek(1)
 	
-		if err == io.EOF || unicode.IsSpace(reps[0].r){
+		if err == io.EOF || unicode.IsSpace(reps[0].char){
 			break
 		}
 		

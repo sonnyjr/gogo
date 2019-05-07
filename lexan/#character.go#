@@ -1,0 +1,116 @@
+// Package lexan
+package lexan
+
+import (
+	"unicode"
+)
+
+type CharacterClass int
+type CharacterKind int
+
+type Character struct {
+	class CharacterClass
+	kind CharacterKind
+	char rune
+	size int
+}
+
+const (
+	newline CharacterClass = 1 /* the Unicode code point U+000A */
+	unicode_char = 2 /* an arbitrary Unicode code point except newline */
+	unicode_letter = 3/* a Unicode code point classified as "Letter" */
+	unicode_digit = 4 /* a Unicode code point classified as "Number, decimal digit" */	
+)
+
+const (
+	none CharacterKind = 0
+	letter CharacterKind = 1
+	decimal_digit CharacterKind = 2
+	octal_digit CharacterKind = 4
+	hex_digit CharacterKind = 8
+)
+
+// Convert's the TokenKind to it's string representation.
+func (cc CharacterClass) String() string {
+	return [...]string{
+		"<newline>",
+		"<unicode_char>",
+		"<unicode_letter>",
+		"<unicode_digit>"}[cc]
+}
+
+func (ck CharacterKind) String() string {
+	return [...]string{
+		"<none>",   //0
+		"<letter>", // 1
+		"<decimal_digit>", // 2
+		"<letter|decimal_digit>", // 3
+		"<octal_digit>", // 4
+		"<letter|octal_digit>", // 5 0101
+		"<decimal_digit|octal_digit>", // 6 0110
+		"<letter|decimal_digit|octal_digit>", // 7 0111
+		"<hex_digit>", // 8 1000
+		"<letter|hex_digit>", // 9 1001
+		"<decimal_digit|hex_digit>", // 10 1010
+		"<letter|decimal_digit|hex_digit>", // 11 1011
+		"<octal_digit|hex_digit>", // 12 1100
+		"<letter|octal_digit|hex_digit>", // 13 1101
+		"<decimal_digit|octal_digit|hex_digit>", // 14 1110
+		"<letter|decimal_digit|octal_digit|hex_digit>", // 15 1111
+	         }[ck]	
+}
+
+func NewCharacter(r rune, size int) Character {
+	if r == '\n' {
+		return Character{
+			class: newline,
+			kind: none,
+			char: r,
+			size: size,
+		}
+	}
+
+	var charKind = none
+	var class CharacterClass
+	
+	if unicode.IsLetter(r) {
+		charKind |= letter
+		class = unicode_letter
+	}
+
+	if r == '_' {
+		charKind |= letter
+		class = unicode_char
+	}
+
+	if unicode.IsDigit(r){		
+		charKind |= decimal_digit
+		class = unicode_digit
+	}
+
+	if r == '0' || r == '1' || r == '2' || r == '3' || r == '4' ||
+		r == '5' || r == '6' || r == '7' {
+		charKind |= octal_digit
+		charKind |= hex_digit
+		class = unicode_digit
+	}
+
+	if r == '8' || r == '9' {
+		charKind |= hex_digit
+		class = unicode_digit
+	}
+	
+	if r == 'A' || r == 'B' || r == 'C' ||
+	   r == 'D' || r == 'E' || r == 'F' || r == 'a' || r == 'b' ||
+	   r  == 'c' || r == 'd' || r == 'e' || r == 'f' {
+	   charKind |= hex_digit
+	   class = unicode_letter
+	}
+
+	return Character{
+		class: class,
+		kind: charKind,
+		char: r,
+		size: size,
+	}
+}

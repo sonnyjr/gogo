@@ -17,7 +17,7 @@ type Source struct {
 	data * bufio.Reader
 	filename string
 	state * SourceState
-	queue RuneQueue
+	queue CharacterQueue
 }
 
 // Checks if the value is the next set of runes.
@@ -30,7 +30,7 @@ func (s * Source) Match(value string) bool {
 	}
 
 	for i, r := range value {
-		if r != reps[i].r {
+		if r != reps[i].char {
 			return false
 		}
 	}
@@ -39,8 +39,8 @@ func (s * Source) Match(value string) bool {
 }
 
 // Peek's n runes ahead without changing the state
-func (s * Source) Peek(n int) ([]RuneRep, error) {
-	runes := []RuneRep{}
+func (s * Source) Peek(n int) ([]Character, error) {
+	runes := []Character{}
 	totalSize := 0
 	
 	for i := 0; i < n; i++ {
@@ -52,7 +52,7 @@ func (s * Source) Peek(n int) ([]RuneRep, error) {
 		}
 		
 		totalSize += size
-		rep := RuneRep{r: r, size: size}
+		rep := NewCharacter(r, size)
 		runes = append(runes, rep)
 	}
 
@@ -75,26 +75,26 @@ func (s * Source) read(update bool) (rune, int, error){
 			s.updateState((*rep))
 		}
 		
-		return (*rep).r, (*rep).size, nil
+		return (*rep).char, (*rep).size, nil
 	}
 	
 	r, size, err := s.data.ReadRune()
 
 	if update {
-		s.updateState(RuneRep{r: r, size: size})
+		s.updateState(NewCharacter(r,size))
 	}
 	
 	return r, size, err	
 }
 
 // Updates the state based on the rune that was read.
-func (s * Source) updateState(rep RuneRep){
-	s.state.totalBytes += rep.size
+func (s * Source) updateState(c Character){
+	s.state.totalBytes += c.size
 	
-	if rep.r == '\n' {		
+	if c.char == '\n' {		
 		s.state.lineNumber += 1
 		s.state.bytePosition = 0
 	} else {
-		s.state.bytePosition += rep.size
+		s.state.bytePosition += c.size
 	}
 }
